@@ -15,16 +15,22 @@ pipeline {
             }
         }
 
-        stage('Test Backend') {
-            steps {
-                dir('backend') {
-                    sh '''
-                        python3 -m pip install -r requirements.txt
-                        python3 -m pytest
-                    '''
-                }
+    stage('Test Backend') {
+        steps {
+            dir('backend') {
+                sh '''
+                    set -e
+
+                    python3 -m venv .venv
+                    . .venv/bin/activate
+
+                    python -m pip install --upgrade pip
+                    python -m pip install -r requirements.txt
+                    python -m pytest
+                '''
             }
         }
+    }
 
         stage('Build Docker Images') {
             steps {
