@@ -15,22 +15,17 @@ pipeline {
             }
         }
 
-    stage('Test Backend') {
-        steps {
-            dir('backend') {
+        stage('Test Backend') {
+            steps {
                 sh '''
-                    set -e
-
-                    python3 -m venv .venv
-                    . .venv/bin/activate
-
-                    python -m pip install --upgrade pip
-                    python -m pip install -r requirements.txt
-                    python -m pytest
+                    docker run --rm \
+                        -v "$WORKSPACE/backend:/app" \
+                        -w /app \
+                        python:3.13-slim \
+                        sh -c "python -m pip install -r requirements.txt pytest && python -m pytest"
                 '''
             }
         }
-    }
 
         stage('Build Docker Images') {
             steps {
