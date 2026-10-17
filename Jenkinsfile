@@ -15,19 +15,31 @@ pipeline {
             }
         }
 
+        
         stage('Test Backend') {
             steps {
-                dir('backend') {
-                    sh '''
-                        docker run --rm \
-                            -v "$PWD:/app" \
-                            -w /app \
-                            python:3.13-slim \
-                            sh -c "python -m pip install -r requirements.txt pytest && python -m pytest"
-                    '''
-                }
+                sh '''
+                    set -eu
+
+                    TEST_CONTAINER="backend-test-${BUILD_NUMBER}"
+
+                    cleanup() {
+                        docker rm -f "$TEST_CONTAINER" >/dev/null 2>&1 || true
+                    }
+                    trap cleanup EXIT
+
+                    docker create \
+                        --name "$TEST_CONTAINER" \
+                        python:3.13-slim \
+                        sh -c 'cd /tmp/backend && python -m pip install -r requirements.txt pytest && python -m pytest'
+
+                    docker cp "$WORKSPACE/backend" "$TEST_CONTAINER:/tmp/"
+
+                    docker start --attach "$TEST_CONTAINER"
+                '''
             }
         }
+
 
         stage('Build Docker Images') {
             steps {
