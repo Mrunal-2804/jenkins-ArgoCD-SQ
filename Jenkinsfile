@@ -78,7 +78,22 @@ pipeline {
                 }
             }
         }
-    }
+
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+
+                    withSonarQubeEnv('MySonar') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                                -Dproject.settings=sonar-project.properties
+                        """
+                    }
+                }
+            }
+        }
+    
 
     post {
         success {
