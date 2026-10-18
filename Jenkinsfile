@@ -82,7 +82,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'SonarScanner'
+                    def scannerHome = tool 'mySonar'
 
                     withSonarQubeEnv('MySonar') {
                         sh """
